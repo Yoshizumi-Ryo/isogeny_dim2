@@ -31,7 +31,6 @@ end function;
 
 //we can check if A=[P_1,...,P_8] is Rimeann position.
 function Riemann_Relation(A)
-  TF:=true; //wanted.
   for cr in CartesianProduct(set_chi,sub_RP_i) do
     i2:=[(cr[2][5][1]-cr[2][1][1]) mod 4,(cr[2][5][2]-cr[2][1][2]) mod 4];
     j2:=[(cr[2][5][1]-cr[2][2][1]) mod 4,(cr[2][5][2]-cr[2][2][2]) mod 4];
@@ -43,17 +42,25 @@ function Riemann_Relation(A)
     RHS:=term(cr[1],i2,j2,A[5],A[6])*term(cr[1],k2,l2,A[7],A[8]);
 
     if LHS ne RHS then 
-      TF:=false;         
-      break cr;
+      return false;      
     end if;
   end for;   
-  return TF;
+  return true;
 end function; 
 
 
 
 //this function gives only necessary condition.
+//the following function determine if level 4 theta null pt is.
 function Is_lv4tnp(lv4tnp)
+  for i1 in {0..3} do
+    for i2 in {0..3} do
+      if lv4tnp[[i1,i2]] ne lv4tnp[[(4-i1) mod 4,(4-i2) mod 4]] then
+        return false;
+      end if;
+    end for;
+  end for;
+
   A:=[lv4tnp,lv4tnp,lv4tnp,lv4tnp,lv4tnp,lv4tnp,lv4tnp,lv4tnp];
   return Riemann_Relation(A);
 end function;
@@ -134,7 +141,7 @@ end function;
 
 
 
-
+/*
 
 //alnp=an affine lift of null point.
 //alx=an of affine lift of x.
@@ -157,9 +164,32 @@ function calc_uxpy(u0,ux,uy,uxmy,zetas)
   end for;
   return sum/(16*uxmy[zetas[2]]*u0[zetas[3]]*u0[zetas[4]]);
 end function;
+*/
 
 
 
+
+//alnp=an affine lift of null point.
+//alx=an of affine lift of x.
+//aly=an of affine lift of y.
+//alxmy=an of affine lift of x-y.
+
+//we calculate of u_zeta(x+y) from other u.
+function calc_uxpy_2(u0,ux,uy,uxmy,zetas)
+  sum:=0;
+  for etaa in set_zeta do
+    zeta1:=zetas[1];
+    ind_1:=precomp_for_add_2[zetas][etaa][1]; 
+    ind_2:=precomp_for_add_2[zetas][etaa][2]; 
+    ind_3:=precomp_for_add_2[zetas][etaa][3]; 
+    ind_4:=precomp_for_add_2[zetas][etaa][4]; 
+
+    coff :=precomp_for_add_2[zetas][etaa][5];     
+
+    sum:=sum+(coff*uy[ind_1]*uy[ind_2]*ux[ind_3]*ux[ind_4]);
+  end for;
+  return sum/(16*uxmy[zetas[2]]*u0[zetas[3]]*u0[zetas[4]]);
+end function;
 
 
 
@@ -192,7 +222,7 @@ function add(alnp,alx,aly,alxmy)
     assert(u0[zetas[4]] ne 0);  //必要で成り立つ仮定.
     assert(uxmy[zetas[2]] ne 0);  //必要だけど勝手に仮定.
 
-    uxpy[zeta1]:=pm_for_zeta1[zeta1]*calc_uxpy(u0,ux,uy,uxmy,zetas);
+    uxpy[zeta1]:=pm_for_zeta1[zeta1]*calc_uxpy_2(u0,ux,uy,uxmy,zetas);
   end for;
 
   assert(Keys(uxpy) eq set_zeta);
@@ -203,18 +233,63 @@ end function;
 
 
 
+//for ex_add.
+function calc_u_xpypz(u0,ux,uy,uz,uxpy,uxpz,uypz,zetas)
+  sum:=0;
+  for etaa in set_zeta do
+    zeta1:=zetas[1];
+    ind_1:=precomp_for_ex_add[zetas][etaa][1]; 
+    ind_2:=precomp_for_ex_add[zetas][etaa][2]; 
+    ind_3:=precomp_for_ex_add[zetas][etaa][3]; 
+    ind_4:=precomp_for_ex_add[zetas][etaa][4]; 
+    coff :=precomp_for_add_2[zetas][etaa][5];     
+    sum:=sum+(coff*u0[ind_1]*uypz[ind_2]*uxpz[ind_3]*uxpy[ind_4]);
+  end for;
+  return sum/(16*ux[zetas[2]]*uy[zetas[3]]*uz[zetas[4]]);
+end function;
+
+
+
+
+
+//extended differential addition.
+function calc_xpypz(tnp,x,y,z,xpy,xpz,ypz)
+               
+  u0:=u_of_ac(tnp);
+  ux:=u_of_ac(x);
+  uy:=u_of_ac(y);
+  uz:=u_of_ac(z);
+  uxpy:=u_of_ac(xpy);
+  uxpz:=u_of_ac(xpz);
+  uypz:=u_of_ac(ypz);
+  uxpypz:=AssociativeArray();
+
+  for zeta1 in set_zeta do
+    zetas:=Ass_better_RP_zetas[zeta1];
+
+    assert(ux[zetas[2]] ne 0);   
+    assert(uy[zetas[3]] ne 0);  
+    assert(uz[zetas[4]] ne 0);  
+
+    uxpypz[zeta1]:=pm_for_zeta1[zeta1]*calc_u_xpypz(u0,ux,uy,uz,uxpy,uxpz,uypz,zetas);
+  end for;
+
+  assert(Keys(uxpy) eq set_zeta);
+
+  xpypz:=u_to_ac(uxpypz);
+  return xpypz;
+end function;
+
+
 
 
 //calculate k-mult.
 function mult(alnp,k,alx)
-  assert (k gt 0);
-
+  assert (k ge 0);
   if (k eq 0) then  //k=0.
     return alnp;
-
   elif (k eq 1) then  //k=1.
     return alx;
-
   else   //k>=2.
     tm1_x:=alx;
     tm2_x:=alnp;
@@ -225,15 +300,38 @@ function mult(alnp,k,alx)
     end for;
     return tx;
   end if;
+end function;
 
+
+
+//calculate kx+y.
+function mult_add(alnp,k,xpy,x,y)
+  assert (k ge 0);
+  if (k eq 0) then  //k=0.
+    return y;
+  elif (k eq 1) then  //k=1.
+    return xpy;
+  else   //k>=2.
+    tm1xpy:=xpy;
+    tm2xpy:=y;
+    for t in [2..k] do
+      txpy:=add(alnp,tm1xpy,x,tm2xpy);
+      tm2xpy:=tm1xpy;
+      tm1xpy:=txpy;
+    end for;
+    return txpy;
+  end if;
 end function;
 
 
 
 
 
-//from e_1,e_2,e_1+e_2, we compute s_1*e_1+s_2*e_2.
 
+
+
+
+//from e_1,e_2,e_1+e_2, we compute s_1*e_1+s_2*e_2.
 function linear_combination(tnp,l,tc1,tc2,tc1p2)
   lin_com:=AssociativeArray();
 
@@ -259,6 +357,63 @@ function linear_combination(tnp,l,tc1,tc2,tc1p2)
   return lin_com;
 end function;
 
+
+
+
+
+
+
+//give x+s_1*e_1+s_2*e_2 for s_1,s_2.
+function x_plus_lincom(tnp,l,e_1,e_2,e_1pe_2,x,xpe_1,xpe_2)
+  xplin_com:=AssociativeArray();
+
+  xplin_com[[0,0]]:=x;
+  xplin_com[[1,0]]:=xpe_1;
+  xplin_com[[0,1]]:=xpe_2;
+  xplin_com[[1,1]]:=calc_xpypz(tnp,x,e_1,e_2,xpe_1,xpe_2,e_1pe_2);
+
+  //x+s_1*e_1=s_1*x+e_1.
+  for s_1 in [2..l] do
+    xplin_com[[s_1,0]]:= mult_add(tnp,s_1,xpe_1,e_1,x);
+  end for;
+
+  //x+s_1*e_1+e_2=(x+(s_1-1)*e_1+e_2)+e_1.
+  for s_1 in [2..l] do
+    xplin_com[[s_1,1]]:=add(tnp,xplin_com[[(s_1-1),1]],e_1,xplin_com[[(s_1-2),1]]);
+  end for;
+  
+  for s_1 in [0..l] do
+    //x+s_1*e_1+s_2*e_2=(x+s_1*e_1+(s_2-1)*e_2)+e_2.
+    for s_2 in [2..l] do
+      xplin_com[[s_1,s_2]]:=add(tnp,xplin_com[[s_1,(s_2-1)]],e_2,xplin_com[[s_1,(s_2-2)]]);
+    end for;
+  end for;
+
+  return xplin_com;
+end function;
+
+
+
+
+
+
+
+//linear combination of x,e_1,e_2.
+function lincom_xe1e2(lv4tnp,l,n,tc_e1,tc_e2,tc_e1pe2,tc_x,tc_xpe1,tc_xpe2)
+  lincom_e1e2:=linear_combination(lv4tnp,l,tc_e1,tc_e2,tc_e1pe2);
+  x_lincom_e1e2:=x_plus_lincom(lv4tnp,l,tc_e1,tc_e2,tc_e1pe2,tc_x,tc_xpe1,tc_xpe2);
+  lin_com:=AssociativeArray();
+
+  for s_1 in [0..l] do
+    for s_2 in [0..l] do
+      for s_0 in [0..(n-1)] do
+        //s0*x+s1*e1+s2*e2=s0*x+(s1*e1+s2*e2).
+        lin_com[[s_0,s_1,s_2]]:=mult_add(lv4tnp,s_0,x_lincom_e1e2[[s_1,s_2]],tc_x,lincom_e1e2[[s_1,s_2]]);
+      end for;
+    end for;
+  end for;
+  return lin_com;
+end function;
 
 //End of additions6.m
 //============================
