@@ -146,7 +146,7 @@ function const_Mat_F(l)
     for i in [1..(l-1)] do
       if IsSquare(l-i^2) then
         _,j:=IsSquare(l-i^2);
-        Mat_F:=Matrix(IntegerRing(),2,2,[i,j, -j,i]);
+        Mat_F:=Matrix(IntegerRing(),2,2,[i,-j, j,i]);
         break i;
       end if;
     end for;
@@ -178,6 +178,7 @@ function const_index_t_j(l,Mat_F)
       index_t:=index_t join {all_t};
     end if;
   end for;
+
   //inv_F is inverse matrix of Mat_F over Z/nZ. (n=4).
   inv_F:=l*Transpose(Mat_F);
   index_j:=AssociativeArray();
@@ -250,9 +251,9 @@ function compute_lmd(lv4tnp,l,lv4tc1,lv4tc2,lv4tc1p2)
 
   Fil:=Parent(lm_j_lpow[3]);
   Fil<y>:=PolynomialRing(Fil);
-  lm_j3:=RootsInSplittingField(y^l-(lm_j_lpow[3]))[1][1];
+  lm_j12:=RootsInSplittingField(y^l-(lm_j_lpow[3]))[1][1];
 
-  return lm_j1,lm_j2,lm_j3;
+  return lm_j1,lm_j2,lm_j12;
 end function;
 
 
@@ -260,11 +261,11 @@ end function;
 function lv4tnp_of_codomain(l,r,index_t,index_j,lv4tnp,lv4tc1,lv4tc2,lv4tc1p2)
   tnp_codomain:=AssociativeArray();  //lv4tnp of codomain.
   
-  lm_j1,lm_j2,lm_j3:=compute_lmd(lv4tnp,l,lv4tc1,lv4tc2,lv4tc1p2);
+  lm_j1,lm_j2,lm_j12:=compute_lmd(lv4tnp,l,lv4tc1,lv4tc2,lv4tc1p2);
   for key in lv4keys do
     lv4tc1[key]:=lm_j1*lv4tc1[key];
     lv4tc2[key]:=lm_j2*lv4tc2[key];
-    lv4tc1p2[key]:=lm_j3*lv4tc1p2[key];
+    lv4tc1p2[key]:=lm_j12*lv4tc1p2[key];
   end for;
 
   lin_com:=linear_combination(lv4tnp,l,lv4tc1,lv4tc2,lv4tc1p2);
@@ -275,6 +276,71 @@ function lv4tnp_of_codomain(l,r,index_t,index_j,lv4tnp,lv4tc1,lv4tc2,lv4tc1p2)
 
   return tnp_codomain;
 end function;
+
+
+//-----------------------------------------
+//image of point.
+
+
+
+
+
+//2nd.
+function compute_mu(lv4tnp,tc_e1,tc_e2,tc_e1pe2,l,lm_j1,lm_j2,lm_j12,tc_x,tc_xpe1,tc_xpe2)
+
+  key:=[0,0];
+  
+  mu_1_lpow:=tc_x[key]/((lm_j1^(l*(l-1)))*mult_add(lv4tnp,l,tc_xpe1,tc_e1,tc_x)[key]);
+
+  mu_2_lpow:=tc_x[key]/((lm_j2^(l*(l-1)))*mult_add(lv4tnp,l,tc_xpe2,tc_e2,tc_x)[key]);
+
+  Fil:=Parent(mu_1_lpow);
+  Fil<y>:=PolynomialRing(Fil);
+  mu_j1:=RootsInSplittingField(y^l-mu_1_lpow)[1][1];
+
+  Fil:=Parent(mu_2_lpow);
+  Fil<y>:=PolynomialRing(Fil);
+  mu_j2:=RootsInSplittingField(y^l-mu_2_lpow)[1][1];
+
+  return mu_j1,mu_j2;
+end function;
+
+
+
+function image_of_point(l,Mat_F,index_t,index_j,lv4tnp,tc_e1,tc_e2,tc_e1pe2,lm_j1,lm_j2,lm_j12,tc_x,tc_xpe1,tc_xpe2)
+  r:=NumberOfRows(Mat_F);
+  img_lv4tc:=AssociativeArray();
+
+  mu_j1,mu_j2:=compute_mu(lv4tnp,tc_e1,tc_e2,tc_e1pe2,l,lm_j1,lm_j2,lm_j12,tc_x,tc_xpe1,tc_xpe2);  
+
+  for key in lv4keys do
+    tc_e1[key]     *:=lm_j1;
+    tc_e2[key]     *:=lm_j2;
+    tc_e1pe2[key]  *:=lm_j12;
+
+    tc_xpe1[key]   *:=mu_j1;
+    tc_xpe2[key]   *:=mu_j2;
+  end for;
+
+  //linear combination of x,e_1,e_2.
+
+  lin_com:=lincom_xe1e2(lv4tnp,l,4,tc_e1,tc_e2,tc_e1pe2,tc_x,tc_xpe1,tc_xpe2);
+  
+  Xpt:=AssociativeArray();
+  for t in index_t do  //t=(t_1,..,t_r).
+    Xpt[t]:=[];
+    for j in {1..r} do
+      Xpt[t][j]:=lin_com[[Mat_F[j][1],t[j][1],t[j][2]]]; //theta cordinate of X_j+t_j.
+    end for;
+  end for;
+
+  for key in lv4keys do
+    img_lv4tc[key]:=&+[&*[Xpt[t][j][index_j[key][j]]:j in {1..r}]:t in index_t];
+  end for;
+
+  return img_lv4tc;
+end function;
+
 
 //End of isogeny.m
 //===================================================
