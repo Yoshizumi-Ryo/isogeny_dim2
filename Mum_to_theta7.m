@@ -77,7 +77,13 @@ function Ros_to_lv22tnp(Ros)
 
   lv22tnp:=AssociativeArray();
   for index in {1..10} do
-    roots:=RootsInSplittingField(x^2-lv22tnpsq[F[index]]);
+    if lv22tnpsq[F[index]] in IntegerRing() then
+      Fld:=K;
+    else 
+      Fld:=Parent(lv22tnpsq[F[index]]);
+    end if;
+    Fldx<y>:=PolynomialRing(Fld);
+    roots:=RootsInSplittingField(y^2-lv22tnpsq[F[index]]);
     lv22tnp[F[index]]:=roots[1][1];
   end for;
 
@@ -666,7 +672,6 @@ function Div_to_lv4tc(lv22tnp,D: R:=1)
   lv4tc:=dbllv22tc_to_lv4tc(dbllv22tc);
   return lv4tc;
 end function;
-
 
 
 
