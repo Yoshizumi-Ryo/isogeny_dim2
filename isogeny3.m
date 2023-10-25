@@ -7,10 +7,10 @@
 
 //decision if K is istropic subgroup w.r.t. Weil paring for l.
 function Is_isotropic(sub_K,J,l,iso_map)
+  g:=Dimension(J);
   group_K:=sub_K`subgroup;  //`
   gen_K:=Generators(group_K);
   assert (#gen_K eq g);
-
   return forall{ptpt:ptpt in CartesianPower(gen_K,2)| WeilPairing(iso_map(ptpt[1]),iso_map(ptpt[2]),l) eq 1};
 end function;
 
@@ -21,7 +21,7 @@ function torsion_pt(J,l)
   g:=Dimension(J);
   the_order:=l^(2*g);  
 
-  for deg in {1..10} do
+  for deg in {1..12} do
     ex_J:=BaseChange(J,deg);
     order_ex_J:=#ex_J;
     if (order_ex_J mod the_order) eq 0 then
@@ -60,6 +60,10 @@ function torsion_pt(J,l)
 end function;
 
 
+
+
+
+
 //return basis of K as point of J.
 function tspt_to_basis(ts_pt,index) 
   Istr:=ts_pt["isotropic"];
@@ -70,6 +74,10 @@ end function;
 
 
 
+
+
+
+/*
 //get one isotropic subgrp K s.t. the base field is not big.
 function take_isotropic(J,l)
   istr_K:=AssociativeArray();  //wanted.
@@ -100,6 +108,100 @@ function take_isotropic(J,l)
   end for;
   return "the base field of J[l] is too big.";
 end function;
+*/
+
+
+
+//get one isotropic subgrp K s.t. the base field is not big.
+function take_one_isotropic(J,l,lim)
+  istr_K:=AssociativeArray();  //wanted.
+  g:=Dimension(J);
+
+  for deg in {1..lim} do  //search lim-deg extension.
+    ex_J:=BaseChange(J,deg);
+    order_ex_J:=#ex_J;
+    if (order_ex_J mod l^g) eq 0 then
+      Abl_J,iso_map:=AbelianGroup(ex_J); //take a lot time.
+      J_l:={g:g in Sylow(Abl_J,l)|l*g eq Sylow(Abl_J,l)!0}; //l-torsion pt of J.
+      Abl_J_l:=sub<Abl_J|J_l>;
+      for rec_K in Subgroups(Abl_J_l) do
+        if rec_K`order eq l^g then  //`
+          if Is_isotropic(rec_K,J,l,iso_map) then
+
+            "found over the following base field.";
+            BaseField(ex_J);
+
+            grp_K:=rec_K`subgroup; //`
+            istr_K["J"]:=ex_J;
+            istr_K["basis"]:={iso_map(gen):gen in Generators(grp_K)};
+            istr_K["seq_basis"]:=[iso_map(gen):gen in Generators(grp_K)];
+            istr_K["group"]:=grp_K;   
+            istr_K["field"]:=BaseField(ex_J);
+            istr_K["K"]:={iso_map(elm): elm in grp_K};
+            return istr_K;
+          end if;
+        end if;
+      end for;
+    end if;
+  end for;
+  "nothing over given degree extension.";
+  return false;
+end function;
+
+
+
+
+
+
+//get one isotropic subgrp K s.t. the base field is not big.
+function take_one_isotropic_2(J,l,lim)
+  istr_K:=AssociativeArray();  //wanted.
+  g:=Dimension(J);
+
+  for deg in {1..lim} do  //search lim-deg extension.
+    deg;
+    ex_J:=BaseChange(J,deg);
+    "pt7";
+    order_ex_J:=#ex_J;
+    "pt8";
+    (order_ex_J mod l^g);
+    "pt9";
+    if (order_ex_J mod l^g) eq 0 then
+      "pt1";
+      Abl_J,iso_map:=AbelianGroup(ex_J); //take a lot time.
+      "pt2";
+      J_l:={g:g in Sylow(Abl_J,l)|l*g eq Sylow(Abl_J,l)!0}; //l-torsion pt of J.
+      "pt3";
+      Abl_J_l:=sub<Abl_J|J_l>;
+      "pt4";
+      for rec_K in Subgroups(Abl_J_l) do
+        ".";
+        if rec_K`order eq l^g then  //`
+          "pt5";
+          if Is_isotropic(rec_K,J,l,iso_map) then
+            "pt6";
+
+            "found over the following base field.";
+            BaseField(ex_J);
+
+            grp_K:=rec_K`subgroup; //`
+            istr_K["J"]:=ex_J;
+            istr_K["basis"]:={iso_map(gen):gen in Generators(grp_K)};
+            istr_K["seq_basis"]:=[iso_map(gen):gen in Generators(grp_K)];
+            istr_K["group"]:=grp_K;   
+            istr_K["field"]:=BaseField(ex_J);
+            istr_K["K"]:={iso_map(elm): elm in grp_K};
+            return istr_K;
+          end if;
+        end if;
+      end for;
+    end if;
+  end for;
+  "nothing over given degree extension.";
+  return false;
+end function;
+
+
 
 
 //---------------------------------------------------------
@@ -233,7 +335,7 @@ function modify_basis(lv4tnp,l,lv4tc1,lv4tc2,lv4tc1p2)
       break i_0;
     end if;
   end for;
- 
+
   for i_0 in lv4keys do
     if (mult(lv4tnp,l_d+1,lv4tc1p2)[i_0] ne 0) then
       lm_j_lpow[3]:=mult(lv4tnp,l_d,inv_lv4tc1p2)[i_0]/mult(lv4tnp,l_d+1,lv4tc1p2)[i_0];
@@ -273,12 +375,14 @@ end function;
 function lv4tnp_of_codomain(l,r,index_t,index_j,lv4tnp,tc_e1,tc_e2,tc_e1pe2)
   tnp_codomain:=AssociativeArray();  //lv4tnp of codomain.
  
+  _,base_field:=global_field_of_seq([tc_e1,tc_e2,tc_e1pe2]);
   tc_e1,tc_e2,tc_e1pe2:=modify_basis(lv4tnp,l,tc_e1,tc_e2,tc_e1pe2);
 
   lin_com:=linear_combination(lv4tnp,l,tc_e1,tc_e2,tc_e1pe2);
 
   for key in lv4keys do
     tnp_codomain[key]:=&+[&*[lin_com[t[j]][index_j[key][j]]:j in {1..r}]:t in index_t];
+    tnp_codomain[key]:=(base_field)!(tnp_codomain[key]);
   end for;
   return tnp_codomain;
 end function;
@@ -307,21 +411,17 @@ end function;
 
 
 
-function image_of_point_new(lincom_e1e2,l,Mat_F,index_t,index_j,lv4tnp,tc_e1,tc_e2,tc_e1pe2,tc_x,tc_xpe1,tc_xpe2)
-
+function image_of_point(lincom_e1e2,l,Mat_F,index_t,index_j,lv4tnp,tc_e1,tc_e2,tc_e1pe2,tc_x,tc_xpe1,tc_xpe2)
   r:=NumberOfRows(Mat_F);
+  max_coff_x:=Max({Mat_F[j][1]: j in {1..r}});
   img_lv4tc:=AssociativeArray();
-
-  mu_j1,mu_j2:=compute_mu_new(lv4tnp,tc_e1,tc_e2,l,tc_x,tc_xpe1,tc_xpe2); 
-
+  mu_j1,mu_j2:=compute_mu_new(lv4tnp,tc_e1,tc_e2,l,tc_x,tc_xpe1,tc_xpe2);
   for key in lv4keys do
     tc_xpe1[key] *:=mu_j1;
     tc_xpe2[key] *:=mu_j2;
   end for;
-
-  //linear combination of x,e_1,e_2.
-  lin_com:=lincom_xe1e2_new(lincom_e1e2,lv4tnp,l,4,tc_e1,tc_e2,tc_e1pe2,tc_x,tc_xpe1,tc_xpe2);
-
+  //construct linear combination of x,e_1,e_2.
+  lin_com:=lincom_xe1e2(lincom_e1e2,lv4tnp,l,max_coff_x,tc_e1,tc_e2,tc_e1pe2,tc_x,tc_xpe1,tc_xpe2);
   Xpt:=AssociativeArray();
   for t in index_t do  //t=(t_1,..,t_r).
     Xpt[t]:=[];
@@ -329,13 +429,12 @@ function image_of_point_new(lincom_e1e2,l,Mat_F,index_t,index_j,lv4tnp,tc_e1,tc_
       Xpt[t][j]:=lin_com[[Mat_F[j][1],t[j][1],t[j][2]]]; //theta cordinate of X_j+t_j.
     end for;
   end for;
-
   for key in lv4keys do
     img_lv4tc[key]:=&+[&*[Xpt[t][j][index_j[key][j]]:j in {1..r}]:t in index_t];
   end for;
-
   return img_lv4tc;
 end function;
+
 
 
 
