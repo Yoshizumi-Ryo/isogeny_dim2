@@ -1,6 +1,7 @@
 # isogeny_dim2
 
 次の順番で読み込ませてください. (Please import the following order.)
+標数pは1の一番最初のところで決めてください.
 
 1.setting3.m (全体的な補助関数やprecomputation)
 
