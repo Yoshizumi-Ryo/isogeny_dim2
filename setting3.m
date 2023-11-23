@@ -1,18 +1,22 @@
 /*-----------------------------
 you compile the following order.
 
-1st.setting2.m
-2nd.Mum_to_theta7.m
-3rd.additions7.m
-4th.isogeny3.m
-5th.test_setting2.m
+1st.setting3.m
+2nd.additions8.m
+3rd.isogeny3.m
+
+4th1.Mum_to_theta.m
+4th2.elliptic_theta4.m
+
+5th1.test_setting2.m
+5th2.test_setting_Ell3.m
 -----------------------------*/
 
 //=============================================
 //Start of setting3.m
 //global setting and precomputation.
 
-p:=419;
+p:=19;
 assert(IsPrime(p));
 
 
@@ -37,7 +41,7 @@ N[14]:=[1,1,0,1];  //odd
 N[15]:=[1,1,1,1];
 
 
-//[89]Gaudry-index. the same with Ohashi's. 
+//[89]Gaudry-index. 
 F:=[];
 
 F[1]:=[0,0,0,0];
@@ -154,9 +158,6 @@ end function;
 
 
 
-
-
-
 function dim1_lv22tc_to_lv4tc(lv22tc)
   lv4tc:=AssociativeArray();
   lv4tc[[0]]:=lv22tc[[0,0]]+lv22tc[[1,0]];
@@ -175,6 +176,47 @@ function dim1_lv4tc_to_lv22tc(lv4tc)
   lv22tc[[1,1]]:=(lv4tc[[1]]-lv4tc[[3]])/2;
   return lv22tc;
 end function;
+
+
+
+
+
+function to_lv22(tc)
+  if Keys(tc) eq lv22keys then
+    return tc;
+  elif Keys(tc) eq lv22keys_dim1 then
+    return tc;
+  elif Keys(tc) eq lv4keys then
+    return lv4tc_to_lv22tc(tc);
+  elif Keys(tc) eq lv4keys_dim1 then
+    return dim1_lv4tc_to_lv22tc(tc);
+  else
+    "Error.";
+    return false;
+  end if;
+end function;
+
+
+
+function to_lv4(tc)
+  if Keys(tc) eq lv4keys then
+    return tc;
+  elif Keys(tc) eq lv4keys_dim1 then
+    return tc;
+  elif Keys(tc) eq lv22keys then
+    return lv22tc_to_lv4tc(tc);
+  elif Keys(tc) eq lv22keys_dim1 then
+    return dim1_lv22tc_to_lv4tc(tc);
+  else
+    "Error.";
+    return false;
+  end if;
+end function;
+
+
+
+
+
 
 
 
@@ -208,8 +250,8 @@ end function;
 function red_lv22tc_dim1(a,b,lv22tc_ab)
   a_red:=a mod 2;
   b_red:=b mod 2;
-  alpha:=a-a_red;
-  beta:=b-b_red;
+  alpha:=a-a_red; //even.
+  beta:=b-b_red;  //even.
   semi_beta:=IntegerRing()!(beta/2);
   coff:=(-1)^(a_red*semi_beta);
   return a_red,b_red,coff*lv22tc_ab;
@@ -221,6 +263,24 @@ end function;
 
 
 
+function value_0is1(tc)
+  if Keys(tc) eq lv22keys then
+    const:=tc[[0,0,0,0]];
+  elif Keys(tc) eq lv4keys then
+    const:=tc[[0,0]];
+  elif Keys(tc) eq {[i]:i in {0..3}} then
+    const:=tc[[0]];
+  elif Keys(tc) eq {[0,0],[0,1],[1,0],[1,1]} then
+    const:=tc[[0,0]];
+  else
+    "Nothing";
+    return false;
+  end if;
+  for key in Keys(tc) do
+    tc[key]:=tc[key]/const;
+  end for;
+  return tc;
+end function;
 
 
 
@@ -510,16 +570,6 @@ assert (Keys(sign_of_zeta1) eq set_zeta);
 
 
 //------------------------------
-sign_ellprod:=AssociativeArray();
-for zeta1 in set_zeta do
-  if zeta1 in ellprod_u0ne0 then
-    sign_ellprod[zeta1]:=1;
-  else 
-    sign_ellprod[zeta1]:=-1;
-  end if;
-end for;
-assert (Keys(sign_ellprod) eq set_zeta);
-
 
 sign_jacob:=AssociativeArray();
 for zeta1 in set_zeta do
@@ -672,7 +722,6 @@ for ab in odd_lv22keys do
     _,s4:=moduloZ(albe);//1
 
     sign_set[[ab,albe]]:=((-1)^(ab[1]*albe[3]+ab[2]*albe[4]))*s1*s2*s3*s4;
-
   end for;
 end for;
 
@@ -785,11 +834,10 @@ end function;
 function eq_Assoc(A,B)
   assert (Category(A) eq Assoc);
   assert (Category(B) eq Assoc);
-
   if Keys(A) ne Keys(B) then
+    "Keys are different.";
     return false;
   end if;
-  
   if Keys(A) eq Keys(B) then
     for key in Keys(A) do
       if A[key] ne B[key] then 
@@ -846,8 +894,6 @@ end for;
 //---------------------------------------
 
 
-
-
 function minus_lv4tc(lv4tc)
   m_lv4tc:=AssociativeArray(); //wanted.  
   for key in lv4keys do
@@ -856,11 +902,6 @@ function minus_lv4tc(lv4tc)
   end for;
   return m_lv4tc;
 end function;
-
-
-
-
-
 
 
 
