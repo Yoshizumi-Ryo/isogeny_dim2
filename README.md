@@ -17,3 +17,5 @@
 
 7.test_setting_attack.m  (SIDH-attackの実装コード) [他のパラメータはここで設定]
 
+--------------------
+func_Mum_to_theta (Mumford表現とtheta座標の間の変換に関わる関数) [上の1の後にimportしてください.]
