@@ -14,8 +14,6 @@
 
 
 
-//p=19.
-
 assert((p mod 4) eq 3);
 K:=GF(p);
 _<t>:=PolynomialRing(GF(p^4));
@@ -30,7 +28,6 @@ lmd_0:=K!(-1);
 _,lv22tnp_0,lv4tnp_0,E_0,j_0,isss_0:=lmd_to_lv22tnp(lmd_0);
 assert(isss_0);
 E_0_4:=BaseChange(E_0,GF(p^4));
-
 
 
 
@@ -57,21 +54,10 @@ QA_EB:=phi_B(Q_A); //image of Q_A wrt E_0->E_B.
 //Note that the following data are public.
 //E_A,PB_EA,QB_EA,E_B,PA_EB,QA_EB;
 
-//-------------------------------
-
-
-
-
-
-
-
-//construct_auxiliary_img(E_0_4,N_A,N_B,P_A,Q_A);
-
-
 
 
 //attack=================
-
+/*
 //construct auxiliary image.
 
 a:=N_A-N_B;  //a=16
@@ -87,19 +73,55 @@ Atk_Ker_phB:={k*atk_gen:k in {0..N_B}};  //Attacker.
 Bob_Ker_phB:={k*E_0_4!R_B:k in {0..N_B}};      //Bob.
 
 Atk_Ker_phB eq Bob_Ker_phB;
+*/
+//=======================
 
 
 
 
-//------------
-
-修正が必要な場所
-codomainの直積がどちらがE_0か判定.
+E_pr,alpha_P_A,alpha_Q_A:=construct_auxiliary_img(E_0_4,N_A,N_B,P_A,Q_A);
 
 
 
+atk_gen:=E_0_4!main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_P_A,alpha_Q_A,Prime_Fac_N_A);
+
+Atk_Ker_phB:={k*atk_gen:k in {0..N_B}};  //Attacker.
+Bob_Ker_phB:={k*E_0_4!R_B:k in {0..N_B}};      //Bob.
+
+Atk_Ker_phB eq Bob_Ker_phB;
+
+
+
+
+/*
+//symp 行列を大量生成
+
+bit_symp44:={};
+for cp in CartesianPower({0,1},16) do
+  A:=Matrix(2,2,[[cp[1],cp[2]],[cp[3],cp[4]]]);
+  B:=Matrix(2,2,[[cp[5],cp[6]],[cp[7],cp[8]]]);
+  C:=Matrix(2,2,[[cp[9],cp[10]],[cp[11],cp[12]]]);
+  D:=Matrix(2,2,[[cp[13],cp[14]],[cp[15],cp[16]]]);
+  M:=[A,B,C,D];
+  if Is_symplectic_g2(M) then
+    bit_symp44 join:={M};
+  end if;
+end for;
+
+
+
+
+for key in even_lv22keys do
+  a1:=key[1];
+  a2:=key[2];
+  b1:=key[3];
+  b2:=key[4];
+  for M in bit_symp44 do
+    A:=M[1];
+    B:=M[2];
+    C:=M[3];
+    D:=M[4];
+    if 
 
 */
-
-
 

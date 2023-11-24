@@ -16,9 +16,9 @@ you compile the following order.
 //Start of setting3.m
 //global setting and precomputation.
 
-p:=19;
+p:=104959;
 assert(IsPrime(p));
-
+assert(IsDivisibleBy((p+1),4));
 
 //---------------------------------------------
 //the following "N" gives correspondence between the numbering of [86]A.1.
@@ -431,14 +431,17 @@ jacob_u0ne0:=
 ellprod_u0ne0:=
 {[[0,0],[3,2]],[[0,0],[3,3]],[[0,0],[3,0]],[[0,0],[3,1]],[[0,1],[2,2]],[[0,1],[2,0]],[[0,0],[2,2]],[[0,0],[2,3]],[[0,0],[2,0]],[[0,0],[2,1]],[[1,1],[2,2]],[[1,1],[2,0]],[[1,0],[0,0]],[[1,0],[0,1]],[[1,0],[0,2]],[[0,0],[1,0]],[[1,0],[0,3]],[[1,0],[2,2]],[[0,0],[1,1]],[[0,0],[1,2]],[[1,0],[2,3]],[[0,0],[1,3]],[[1,0],[2,0]],[[1,0],[2,1]],[[0,1],[0,0]],[[1,1],[0,0]],[[0,1],[0,2]],[[0,1],[1,0]],[[1,1],[0,2]],[[0,1],[1,2]],[[0,0],[0,0]],[[0,0],[0,1]],[[0,0],[0,2]],[[0,0],[0,3]],[[0,1],[3,2]],[[0,1],[3,0]]};
 
+//32/64.
+all_u0ne0:=
+{[[0,1],[2,2]],[[0,1],[2,0]],[[0,1],[1,0]],[[0,1],[1,2]],[[1,0],[0,0]],[[1,0],[0,1]],[[1,0],[0,2]],[[1,0],[0,3]],[[0,0],[1,1]],[[0,0],[1,3]],[[0,0],[3,3]],[[1,0],[2,2]],[[1,1],[0,0]],[[0,0],[3,1]],[[1,0],[2,3]],[[1,0],[2,0]],[[1,1],[0,2]],[[1,0],[2,1]],[[1,1],[2,2]],[[0,1],[3,2]],[[0,1],[0,0]],[[1,1],[2,0]],[[0,1],[3,0]],[[0,1],[0,2]]};
 
 
 RP_zetas:={};
 for car_zeta1 in CartesianProduct(set_chi,set_i) do
   zeta1:=[car_zeta1[1],car_zeta1[2]];
   for number in {1..20} do
-    zeta3:=Random(ellprod_u0ne0);
-    zeta4:=Random(ellprod_u0ne0);
+    zeta3:=Random(all_u0ne0);
+    zeta4:=Random(all_u0ne0);
     car_zeta5:=Random(CartesianProduct(set_chi,set_i));
     zeta5:=[car_zeta5[1],car_zeta5[2]];
 
@@ -447,7 +450,7 @@ for car_zeta1 in CartesianProduct(set_chi,set_i) do
     (2*zeta5[2][2]-(zeta1[2][2]+zeta3[2][2]+zeta4[2][2])) mod 4];
 
     zeta2:=[chi2,j];
-    if zeta2 in ellprod_u0ne0 then
+    if zeta2 in all_u0ne0 then
       zetas:=[zeta1,zeta2,zeta3,zeta4,zeta5];
       RP_zetas join:={zetas};
     end if;

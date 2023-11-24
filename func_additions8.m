@@ -55,6 +55,11 @@ function Is_lv4tnp(lv4tnp)
 end function;
 
 
+function Is_tnp(tnp)
+  return Is_lv4tnp(to_lv4(tnp));
+end function;
+
+
 
 
 
@@ -215,6 +220,18 @@ function add(alnp,alx,aly,alxmy)
     for zetas in RP_zetas do
       if (zetas[1] eq zeta1) then
         if (uxmy[zetas[2]] ne 0) then
+          if (u0[zetas[3]] eq 0) then 
+            "Check";
+            assert(Is_lv4tnp(alnp));
+            Is_prod_ell(alnp);
+            "here";
+            to_lv22(alnp)[[1,1,1,1]];
+            #{zeta:zeta in set_zeta|u0[zeta] ne 0};
+            #{zeta:zeta in all_u0ne0|u0[zeta] ne 0};
+            {zeta:zeta in all_u0ne0|u0[zeta] ne 0};
+            "Chcek_fin";
+          end if;
+
           assert(u0[zetas[3]] ne 0);  
           assert(u0[zetas[4]] ne 0);
           uxpy[zeta1]:=sign_jacob[zeta1]*calc_uxpy_3(u0,ux,uy,uxmy,zetas);
