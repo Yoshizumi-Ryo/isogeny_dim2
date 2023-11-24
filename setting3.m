@@ -18,7 +18,22 @@ you compile the following order.
 
 p:=104959;
 assert(IsPrime(p));
-assert(IsDivisibleBy((p+1),4));
+assert((p mod 4) eq 3);
+
+
+_<x>:=PolynomialRing(GF(p));
+assert(#RootsInSplittingField(x^8-1) eq 8);
+for i in {1..8} do
+  cand_zeta_8:=RootsInSplittingField(x^8-1)[i][1];
+  if cand_zeta_8^4 eq -1 then
+    zeta_8:=cand_zeta_8;
+    break i;
+  end if;
+end for;
+assert(zeta_8^4 eq -1);
+
+
+
 
 //---------------------------------------------
 //the following "N" gives correspondence between the numbering of [86]A.1.
@@ -907,6 +922,24 @@ function minus_lv4tc(lv4tc)
 end function;
 
 
+
+//-------------------------------------------
+
+//construct matrix moving 0-valued pt to [1,1,1,1].
+TP:=AssociativeArray();
+for key in even_lv22keys do
+  a1:=key[1];
+  a2:=key[2];
+  b1:=key[3];
+  b2:=key[4];
+  if key ne [1,1,1,1] then
+    TP[key]:=Matrix(IntegerRing(),4,4,[[1,0,b1,0],
+    [0,1,0,b2],[a1,0,1,0],[0,a2,0,1]]);
+    assert(Is_symplectic_g2(mat_to_set(TP[key])));
+  end if;
+end for;
+TP[[1,1,1,1]]:=Matrix(IntegerRing(),4,4,[0,1,0,1, 1,0,1,0, 1,0,1,1, 0,1,1,1]);
+assert(Is_symplectic_g2(mat_to_set(TP[[1,1,1,1]])));
 
 //End of setting3.m
 //=======================================================

@@ -29,30 +29,6 @@ function Is_symplectic_g2(M)
 end function;
 
 
-//------------------------------------
-//compute 8-th root of 1.
-_<x>:=PolynomialRing(GF(p));
-zeta_8:=RootsInSplittingField(x^8-1)[2][1];
-assert(zeta_8^4 eq -1);
-
-
-//construct matrix moving 0-valued pt to [1,1,1,1].
-TP:=AssociativeArray();
-for key in even_lv22keys do
-  a1:=key[1];
-  a2:=key[2];
-  b1:=key[3];
-  b2:=key[4];
-  if key ne [1,1,1,1] then
-    TP[key]:=Matrix(IntegerRing(),4,4,[[1,0,b1,0],
-    [0,1,0,b2],[a1,0,1,0],[0,a2,0,1]]);
-    assert(Is_symplectic_g2(mat_to_set(TP[key])));
-  end if;
-end for;
-TP[[1,1,1,1]]:=Matrix(IntegerRing(),4,4,[0,1,0,1, 1,0,1,0, 1,0,1,1, 0,1,1,1]);
-assert(Is_symplectic_g2(mat_to_set(TP[[1,1,1,1]])));
-//------------------------------------
-
 
 function Mab_dim2(M,ab)
   assert(Is_symplectic_g2(M));
